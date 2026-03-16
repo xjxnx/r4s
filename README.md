@@ -38,3 +38,28 @@ SSH连接openwrt后执行命令：cp -r /overlay/* /mnt/sda3 （将原overlay下
 删除刚刚的/mnt/sda3 挂载
 将新分区重新挂载为overlay
 重启openwrt
+
+################################################################################
+# 1、解压 ImmortalWrt 镜像压缩包
+# 把 .img.gz 文件解压成 .img 镜像文件
+gzip -d immortalwrt.img.gz
+
+# 2、给镜像文件增加 8GB 空间
+# 只是扩大镜像文件大小，不会真正写入数据
+truncate -s +8G immortalwrt.img
+
+# 3、打开 parted 分区工具，修改镜像里的分区
+parted immortalwrt.img
+
+# 4、把第3个分区（rootfs）扩展到镜像末尾
+resizepart 3 100%
+
+# 5、查看当前分区信息，确认扩容成功
+print
+
+# 6、退出 parted
+quit
+
+# 7、重新压缩镜像文件
+# 把 img 再压缩成 img.gz，方便保存或下载
+gzip /root/immortalwrt-24.10.5-876-5.28.img
